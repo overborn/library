@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="well">
+<h3>Edit book</h3>
+<h5> You are only able to add <a href="{{ url_for('authors') }}">existing authors</a>. Blank fields and non-authors are ignored.</h5>
+<small>edit a title:</small>
+
+<form class="form" action="" method="post" name="edit_author">
+    {{form.hidden_tag()}}
+    {{form.title(class="span4", placeholder="Title")}}
+    <br>
+    <p><span class="small">
+        <a href="#" id="AddMoreFileBox" class="btn btn-info">Add authors</a>
+    </span>
+    <input class="btn btn-primary" type="submit" value="Save changes">
+    </p> 
+    
+
+    <div id="InputsWrapper">
+    {% for field in form.authors %}
+    <div id="authorsDiv">{{field(class="span4", placeholder="author 1")}}
+    <a href="#" class="removeclass">&times;</a></div>
+    {% endfor %}
+
+    	<script src="/static/js/add_field.js"></script>
+    </div>
+    
+</form></div>
+{% endblock %}

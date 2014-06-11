@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="well">
+<h3>Find your book!</h3>
+<form class="form" action="" method="post" name="search">
+    {{form.hidden_tag()}}    
+    {{form.search(size=20, placeholder="Search", class = "span4")}}
+    <table>
+    <tr><td>{{form.by_title.label}}  {{form.by_title()}}</td></tr>
+    <tr><td>{{form.by_author.label}}  {{form.by_author()}}</td></tr>
+    </table>  
+
+    <div class="control-group">
+            <div class="controls">
+                <input class="btn btn-primary" type="submit" value="Search">
+            </div>
+        </div>
+</form>
+{% endblock %}

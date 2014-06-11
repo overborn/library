@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="well">
+<h3>Add author</h3>
+<small>Here you can't add book</small>
+
+<form class="form" action="" method="post" name="edit_author">
+    {{form.hidden_tag()}}
+    <table>
+    <tr><td>{{form.name(size=20, class = "span4")}}</td></tr>
+    </table>  
+
+    <div class="control-group">
+            <div class="controls">
+                <input class="btn btn-primary" type="submit" value="Add">
+            </div>
+    </div>
+</form>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+<!-- extend base layout -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1 class="text-center"> Authors </h1>
+{% if g.user.is_authenticated() %}
+<p class="text-center"><a href='{{ url_for('add_author') }}' class="btn btn-primary"><b>Add a new author</b></a></p>
+
+{% endif %}
+
+
+{% for author in authors.items %}
+{% include 'author.html' %}
+{% endfor %}
+<ul class="pager">
+    {% if authors.has_prev %}
+    <li class="previous"><a href="{{ url_for('authors', page = authors.prev_num) }}">Newer</a></li>
+    {% else %}
+    <li class="previous disabled"><a href="#">Newer</a></li>
+    {% endif %}
+    {% if authors.has_next %}
+    <li class="next"><a href="{{ url_for('authors', page = authors.next_num) }}">Older</a></li>
+    {% else %}
+    <li class="next disabled"><a href="#">Older</a></li>
+    {% endif %}
+</ul>
+{% endblock %}

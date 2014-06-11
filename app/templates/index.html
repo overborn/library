@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+{% if g.user.is_authenticated() %}
+<h1>Welcome, {{g.user.username}}!</h1>
+<h3>This is index page.</h3>
+{% else %}
+<h1>Welcome, anonymous!</h1>
+<h3>
+	Please <a href="{{url_for('signup')}}">register</a> or <a href="{{url_for('login')}}">log in</a>. 
+</h3>
+{% endif %}
+
+
+
+{% endblock %}
