@@ -2,11 +2,10 @@ from flask import render_template, flash, redirect, session, url_for, request, g
 from flask.ext.login import login_user, logout_user, current_user, login_required
 
 from app import app, db, lm
-from forms import LoginForm, SearchForm, SignupForm, EditAuthor, EditBook, AddAuthor
+from forms import LoginForm, SearchForm, SignupForm, EditAuthor, EditBook, AddBook
 from models import User, Book, Author
 from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS
 import hashlib, re, random, string
-from datetime import datetime
 
 def make_salt(): return ''.join(random.choice(string.letters) for x in xrange(5))
 def make_pw_hash(name, pw, salt=None):
@@ -134,14 +133,14 @@ def internal_error(error):
 @app.route('/author/add', methods = ['GET', 'POST'])
 @login_required
 def add_author():
-	form = AddAuthor()
+	form = EditAuthor()
 	if form.validate_on_submit():
 		name = form.name.data
 		registered_author = author_by_name(name)
 		if registered_author:
 			flash('Author already exists.')
 			return redirect(url_for('add_author'))
-		author = Author(name, datetime.utcnow())
+		author = Author(name)
 		db.session.add(author)
 		db.session.commit()
 		flash("You've added a new author.")
@@ -161,7 +160,7 @@ def edit_author(id):
 	form = EditAuthor()
 	if form.validate_on_submit():
 		name = form.name.data
-		if author_by_name(name).id != author.id:
+		if author_by_name(name) and author_by_name(name).id != author.id:
 			flash("Can't change name to existing one.")
 			return redirect(url_for('edit_author', id = id))
 		author.name = name
@@ -186,7 +185,7 @@ def delete_author(id):
 @app.route('/book/add', methods = ['GET', 'POST'])
 @login_required
 def add_book():
-	form = EditBook()
+	form = AddBook()
 	if form.validate_on_submit():		
 		title = form.data['title']
 		book = Book.query.filter_by(name=title).first()
@@ -195,7 +194,7 @@ def add_book():
 			return redirect(url_for('edit_book', id = book.id))
 		authors = list(set([author_by_name(
 			name=a) for a in form.data['authors'] if a and author_by_name(name=a)]))		
-		book = Book(title, authors, datetime.utcnow())
+		book = Book(title, authors)
 		db.session.add(book)
 		db.session.commit()
 		flash('Book has been added.')
@@ -210,21 +209,29 @@ def edit_book(id):
 	if book == None:
 		flash("Book is not found")
 		return redirect(url_for('books'))
+	print book.authors
 	form = EditBook()
+	#form.authors.min_entries = len(book.authors)
 	form.title.data = book.name
-	print form.authors
+	print form.authors.data, len(form.authors.entries)
 	for a in form.authors:
 		form.authors.pop_entry()
 	for author in book.authors:
-		form.authors.append_entry(author.name)
+		form.authors.append_entry(author.name)	
+	print form.authors.data
+
 	if form.validate_on_submit():		
 		print form.data['authors']
-		book.name = form.data['title']
+		print request.data + 'lol'
+		name = form.data['title']
+		if id != Book.query.filter_by(name=name).first().id:
+			flash("Can't change name to existing one.")
+			return redirect(url_for('edit_book', id = id))
+		book.name = name
 		authors = list(set([author_by_name(
 			name=a) for a in form.data['authors'] if a and author_by_name(name=a)]))
-		print authors
-		book.authors = authors
-		print book.authors
+		#print authors
+		book.authors = authors		
 		db.session.commit()
 		flash('Changes have been saved.')
 		return redirect(url_for('edit_book', id=id))

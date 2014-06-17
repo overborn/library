@@ -1,6 +1,7 @@
 from flask.ext.wtf import Form
 from wtforms import TextField, PasswordField, FieldList, BooleanField, FormField
 from wtforms.validators import Required, Length, EqualTo
+# from models import Book
 
 class LoginForm(Form):
 	username = TextField('username', validators = [Required(), Length(min = 3, max = 18)])
@@ -12,15 +13,6 @@ class SignupForm(Form):
 		Length(min = 8, max = 18), 
 		EqualTo('confirm', message='Passwords must match')])
 	confirm = PasswordField('confirm')
-
-	# def validate(self):
-	# 	if not Form.validate(self):
-	# 		return False
-	# 	if self.username.data != User.make_valid_nickname(self.username.data):
-	# 		self.username.errors.append(gettext('''This nickname has invalid characters.
-	# 			Please use letters, numbers, dots and underscores only.'''))
-	# 		return False
-	# 	return True
 
 class SearchForm(Form):
 	search = TextField('search', validators = [Required()])
@@ -36,12 +28,32 @@ class SearchForm(Form):
 class EditAuthor(Form):
 	name = TextField('name', validators = [Required()])
 
-class AddAuthor(Form):
-	name = TextField('name', validators = [Required()])
+class AddBook(Form):
+	title = TextField('title', validators = [Required()])
+	authors = FieldList(TextField('authors'), min_entries=1, max_entries=8)
+
+class BetterFieldList(FieldList):
+	def __init__(self, *args, **kwargs):
+		self.book = kwargs.pop("book", None)
+		if self.book:
+			self.min_entries = len(self.book.authors)
+		super(BetterFieldList, self).__init__(*args, **kwargs)
 
 class EditBook(Form):
 	title = TextField('title', validators = [Required()])
 	authors = FieldList(TextField('authors'), min_entries=1, max_entries=8)
+
+	# def __init__(self, *args, **kwargs):
+	# 	self.book = kwargs.pop("book", None)
+	# 	print self.book
+	# 	if self.book:		
+	# 		self.title.data = self.book.name			
+	# 		self.authors.min_entries = len(self.book.authors)
+	# 		#self.authors.entries = [a.name for a in self.book.authors]
+	# 	super(EditBook, self).__init__(*args, **kwargs)
+	# 	if not self.book:
+	# 		raise ValueError("requires book to be set")
+
 
 
 

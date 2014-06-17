@@ -31,9 +31,9 @@ class Author(db.Model):
 	name = db.Column(db.String(100), unique=True, index = True)
 	created = db.Column(db.DateTime, default = datetime.utcnow)
 	
-	def __init__(self, name, created):
+	def __init__(self, name):
 		self.name = ' '.join([w.capitalize() for w in name.split(' ')])
-		self.created = created
+		self.created = datetime.utcnow()
 	def __repr__(self):
 		return '<Author %r>' % self.name
 
@@ -46,10 +46,10 @@ class Book(db.Model):
 	authors = db.relationship('Author', secondary = authors,
 		backref = db.backref('books', lazy = 'dynamic'))
 
-	def __init__(self, name, authors, created):
+	def __init__(self, name, authors):
 		self.name = name
 		self.authors = authors
-		self.created = created
+		self.created = datetime.utcnow()
 
 
 	def __repr__(self):

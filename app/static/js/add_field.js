@@ -29,6 +29,7 @@ $(AddButton).click(function (e)  //on add input button click
             //     value: "value"}).appendTo('form');
             x++; //text box increment
         }
+
 return false;
 });
 
