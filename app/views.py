@@ -213,10 +213,9 @@ def edit_book(id):
 	form = EditBook()
 	#form.authors.min_entries = len(book.authors)
 	form.title.data = book.name
-	print form.authors.data, len(form.authors.entries)
-	for a in form.authors:
-		form.authors.pop_entry()
-	for author in book.authors:
+	print form.authors.data
+	form.authors[0].data = book.authors[0].name
+	for author in book.authors[1:]:
 		form.authors.append_entry(author.name)	
 	print form.authors.data
 
