@@ -1,7 +1,9 @@
-import flask.ext.whooshalchemy as whooshalchemy
 from app import db, app
 from datetime import datetime
 import re
+from config import WHOOSH_ENABLED
+
+
 
 authors = db.Table('authors',
 	db.Column('author_id', db.Integer, db.ForeignKey('author.id')),
@@ -39,7 +41,7 @@ class Author(db.Model):
 
 
 class Book(db.Model):
-	__searchable__ = ['name']#, 'authors']
+	__searchable__ = ['name']
 	id = db.Column(db.Integer, primary_key = True)
 	name = db.Column(db.String(100), unique=True, index = True)
 	created = db.Column(db.DateTime, default = datetime.utcnow)
@@ -55,7 +57,10 @@ class Book(db.Model):
 	def __repr__(self):
 		return '<Book %r>' % self.name
 
-whooshalchemy.whoosh_index(app, Book)
-whooshalchemy.whoosh_index(app, Author)
+if WHOOSH_ENABLED:
+	import flask.ext.whooshalchemy as whooshalchemy
+	whooshalchemy.whoosh_index(app, Book)
+	whooshalchemy.whoosh_index(app, Author)
+
 
 
