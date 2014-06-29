@@ -18,6 +18,22 @@ lm.login_view = 'login'
 #     app.logger.setLevel(logging.INFO)
 #     app.logger.info('microblog startup')
 
+import logging
+import sys
+app.debug = True
+
+# Configure logging.
+app.logger.setLevel(logging.DEBUG)
+del app.logger.handlers[:]
+
+handler = logging.StreamHandler(stream=sys.stdout)
+handler.setLevel(logging.DEBUG)
+handler.formatter = logging.Formatter(
+    fmt=u"%(asctime)s level=%(levelname)s %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%SZ",
+)
+app.logger.addHandler(handler)
+
 from app import views, models
 
 
