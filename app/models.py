@@ -13,7 +13,7 @@ authors = db.Table('authors',
 class User(db.Model):
 	id = db.Column('user_id', db.Integer, primary_key = True)
 	username = db.Column(db.String(20), unique=True, index=True)
-	pw_hash = db.Column(db.String(64))
+	pw_hash = db.Column(db.String(100))
 
 	def __init__(self, username, pw_hash):
 		self.username = username
