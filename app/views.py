@@ -4,7 +4,7 @@ from flask.ext.login import login_user, logout_user, current_user, login_require
 from app import app, db, lm
 from forms import LoginForm, SearchForm, SignupForm, EditAuthor, EditBook, AddBook
 from models import User, Book, Author
-from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS
+from config import POSTS_PER_PAGE, MAX_SEARCH_RESULTS, WHOOSH_ENABLED
 import hashlib, re, random, string
 
 def make_salt(): return ''.join(random.choice(string.letters) for x in xrange(5))
@@ -36,28 +36,40 @@ def index():
 def search():
 	form = SearchForm()
 	if form.validate_on_submit():
-		return redirect(url_for('search_results', query = form.search.data))
+		query = '1' if form.by_title.data else '0'
+		query = query + '1' if form.by_author.data else query + '0'
+		return redirect(url_for('search_results', query = query + form.search.data))
 	return render_template('search.html', form = form)
 
 @app.route('/search_results/<query>')
 def search_results(query):
 	results = []
-	form = SearchForm()
-	if form.by_title:
-		results += Book.query.whoosh_search(
-			"*" + query + "*", limit = MAX_SEARCH_RESULTS, fields=('name',)).all()
-	print results
-	if form.by_author:
-		authors = Author.query.whoosh_search(
-			"*" + query + "*", limit = MAX_SEARCH_RESULTS).all()
-		res = set([])
-		for author in authors:
-			res.update(author.books)
-		results += list(res)
-		results = list(set(results))
-	
+	# form = SearchForm()
+	# if WHOOSH_ENABLED:
+	# 	if form.by_title:
+	# 		results += Book.query.whoosh_search(
+	# 			"*" + query + "*", limit = MAX_SEARCH_RESULTS, fields=('name',)).all()
+	# 	print results
+	# 	if form.by_author:
+	# 		authors = Author.query.whoosh_search(
+	# 			"*" + query + "*", limit = MAX_SEARCH_RESULTS).all()
+	# 		res = set([])
+	# 		for author in authors:
+	# 			res.update(author.books)
+	# 		results += list(res)
+	# 		results = list(set(results))
+	# else:
+	#print query
+	if query[0] == '1':
+		print 'a'		
+		results += Book.query.filter(Book.name.like('%' + query[2:] + '%')).all()
+	if query[1] == '1':
+		print 'b'
+		from models import authors
+		results += Book.query.join(authors).join(Author).filter(Author.name.like('%' + query[2:] + '%')).all()
+	results = list(set(results))
 	print query, results
-	return render_template('search_results.html', query = query, results = results)
+	return render_template('search_results.html', query = query[2:], results = results)
 
 
 @app.route('/signup', methods=['GET','POST'])
