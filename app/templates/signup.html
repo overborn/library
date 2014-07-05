@@ -4,13 +4,16 @@
 
 <div class="well">
 <h3>Sign Up</h3>
-<form class="form" action="" method="post" name="login">
+<form class="form" action="" method="post" name="login" id="passwordTest">
     {{form.hidden_tag()}}
     <table>
     <tr><td>Username </td> <td>{{form.username(size=20, class = "span4")}}</td></tr>
-    <tr><td>Password </td> <td>{{form.password(size=20, class = "span4")}}</td></tr>
-    <tr><td>Confirm </td>  <td>{{form.confirm(size=20, class = "span4")}}</td></tr>
+    <tr><td>Password </td> <td>{{form.password(size=20, class = "span4", id="password1")}}</td></tr>
+    <tr><td>Confirm </td>  <td>{{form.confirm(size=20, class = "span4", id="password2")}}</td></tr>
+    <div id="pass-info"></div>
+
     </table>
+    <script type="text/javascript" src="/static/js/pass_strength.js"></script>
 
         {% for error in form.errors.username %}
         <span style="color: red;">[{{error}}]</span>
