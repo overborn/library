@@ -4,7 +4,29 @@
 {% block content %}
 <h1 class="text-center"> Authors </h1>
 {% if g.user.is_authenticated() %}
-<p class="text-center"><a href='{{ url_for('add_author') }}' class="btn btn-primary"><b>Add a new author</b></a></p>
+
+<p class="text-center"><button  class="btn btn-primary"><b>Add a new author</b></button></p>
+
+<script src="/static/js/toggle_form.js"></script>
+
+<div class="well">
+<h3>Add author</h3>
+<small>Here you can't add book</small>
+
+<form class="form" action="" method="post" name="edit_author">
+    {{form.hidden_tag()}}
+    <table>
+    <tr><td>{{form.name(size=20, class = "span4")}}</td></tr>
+    </table>  
+
+    <div class="control-group">
+            <div class="controls">
+                <input class="btn btn-primary" type="submit" value="Add">
+            </div>
+    </div>
+</form>
+</div>
+
 
 {% endif %}
 

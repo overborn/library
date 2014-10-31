@@ -4,8 +4,38 @@
 {% block content %}
 <h1 class="text-center"> Books </h1>
 {% if g.user.is_authenticated() %}
-<p class="text-center"><a href='{{ url_for('add_book') }}' class="btn btn-primary"><b>Add a new book</b></a></p>
 
+<p class="text-center"><button class="btn btn-primary"><b>Add a new book</b></button></p>
+
+<script src="/static/js/toggle_form.js"></script>
+
+<div class="well">
+<h3>Add book</h3>
+<h5> You are only able to add <a href="{{ url_for('authors') }}">existing authors</a>. Blank fields and non-authors are ignored.</h5>
+<small>add a title:</small>
+
+<form class="form" action="" method="post" name="edit_author">
+    {{form.hidden_tag()}}
+    {{form.title(class="span4", placeholder="Title")}}
+    <br>
+    <p><span class="small">
+        <a href="#" id="AddMoreFileBox" class="btn btn-info">Add authors</a>
+    </span>
+    <input class="btn btn-primary" type="submit" value="Add book">
+    </p> 
+    
+
+    <div id="InputsWrapper">
+    {% for field in form.authors %}
+    <div id="authorsDiv">{{field(class="span4", placeholder="author 1")}}
+    <a href="#" class="removeclass">&times;</a></div>
+    {% endfor %}
+    
+    <!-- <input type="text" id="authors-1" name="authors[]" class="span4" placeholder="author 1"/></div>     -->
+        <script src="/static/js/add_field.js"></script>
+    </div>
+    
+</form></div>
 {% endif %}
 
 {% for book in books.items %}

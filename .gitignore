@@ -1,3 +1,6 @@
 *.pyc
 app.db
 search.db
+library.sublime-project
+library.sublime-workspace
+*.log

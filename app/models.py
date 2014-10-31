@@ -34,10 +34,18 @@ class Author(db.Model):
 	created = db.Column(db.DateTime, default = datetime.utcnow)
 	
 	def __init__(self, name):
-		self.name = ' '.join([w.capitalize() for w in name.split(' ')])
+		self.name = ' '.join([w.capitalize() for w in name.split(' ')]).strip()
 		self.created = datetime.utcnow()
 	def __repr__(self):
 		return '<Author %r>' % self.name
+		
+	@classmethod
+	def by_name(cls, name):
+		name = ' '.join([w.capitalize() for w in name.split(' ')])
+		return cls.query.filter_by(name = name).first()
+	@classmethod
+	def is_valid(cls, name):
+		return name != '' and cls.by_name(name)
 
 
 class Book(db.Model):
@@ -49,7 +57,7 @@ class Book(db.Model):
 		backref = db.backref('books', lazy = 'dynamic'))
 
 	def __init__(self, name, authors):
-		self.name = name
+		self.name = name.strip()
 		self.authors = authors
 		self.created = datetime.utcnow()
 

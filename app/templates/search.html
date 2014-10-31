@@ -8,8 +8,8 @@
     {{form.hidden_tag()}}    
     {{form.search(size=20, placeholder="Search", class = "span4")}}
     <table>
-    <tr><td>{{form.by_title.label}}  {{form.by_title()}}</td></tr>
-    <tr><td>{{form.by_author.label}}  {{form.by_author()}}</td></tr>
+    <tr><td>{{form.by_title.label}}</td><td> {{form.by_title()}}</td>
+    <td>{{form.by_author.label}}</td> <td>{{form.by_author()}}</td></tr>
     </table>  
 
     <div class="control-group">
@@ -18,4 +18,11 @@
             </div>
         </div>
 </form>
+
+{% if results %}
+    <h3>{{ num }} books found for "{{query}}":</h3>
+    {% for book in results %}
+        {% include 'book.html' %}
+    {% endfor %}
+{% endif %}
 {% endblock %}

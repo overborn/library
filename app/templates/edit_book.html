@@ -20,13 +20,16 @@
 
     <div id="InputsWrapper">
     {% for field in form.authors %}
-    <div id="authorsDiv">{{field(class="span4", placeholder="author 1", value=field.data)}}
+    <div id="authorsDiv">{{field(class="span4", placeholder="author 1")}}
     <a href="#" class="removeclass">&times;</a></div>
     {% endfor %}
-
-    	<script src="/static/js/add_field.js"></script>
         
     </div>
     
 </form></div>
+<script src="/static/js/add_field.js"></script>
+<script src="/static/js/jquery-ui.js"></script>
+<script src="/static/js/jquery-ui.min.js"></script>
+<script src="/static/js/auto_add.js"></script>
+
 {% endblock %}

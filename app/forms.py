@@ -41,21 +41,20 @@ class BetterFieldList(FieldList):
 
 class EditBook(Form):
 	title = TextField('title', validators = [Required()])
-	authors = FieldList(TextField('authors'), min_entries=1, max_entries=8)
-
-	# def __init__(self, *args, **kwargs):
-	# 	self.book = kwargs.pop("book", None)
-	# 	print self.book
-	# 	if self.book:		
-	# 		self.title.data = self.book.name			
-	# 		self.authors.min_entries = len(self.book.authors)
-	# 		#self.authors.entries = [a.name for a in self.book.authors]
-	# 	super(EditBook, self).__init__(*args, **kwargs)
-	# 	if not self.book:
-	# 		raise ValueError("requires book to be set")
-
-
-
-
-
-
+	authors = FieldList(TextField(), min_entries=1, max_entries=8)	
+	def __init__(self, *args, **kwargs):
+		super(EditBook, self).__init__(*args, **kwargs)
+		self.book = kwargs.pop("book", None)
+		self.title.data = self.book.name
+		#self.authors[0].data = self.book.authors[0].name
+		# for a in self.book.authors[1:]:
+		# 	self.authors.append_entry(a.name)
+		#self.process(obj=self.book)
+				
+		# if self.book:			
+			#self.authors.min_entries = len(self.book.authors)
+			#self.authors.entries = [a.name for a in self.book.authors]
+		
+		# if not self.book:
+		# 	super(EditBook, self).__init__(*args, **kwargs)
+			#raise ValueError("requires book to be set")

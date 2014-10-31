@@ -1,4 +1,4 @@
-from flask import render_template, flash, redirect, session, url_for, request, g
+from flask import render_template, flash, redirect, session, url_for, request, g, jsonify
 from flask.ext.login import login_user, logout_user, current_user, login_required
 
 from app import app, db, lm
@@ -15,10 +15,6 @@ def make_pw_hash(name, pw, salt=None):
 def valid_pw(name, pw, h): return h == make_pw_hash(name, pw, h.split('|')[1])
 def valid_username(username): return re.match(r'^[a-zA-Z0-9_-]{3,18}', username)
 
-def author_by_name(name):
-	name = ' '.join([w.capitalize() for w in name.split(' ')])
-	return Author.query.filter_by(name = name).first()
-
 @lm.user_loader
 def load_user(id):
     return User.query.get(int(id))
@@ -33,43 +29,23 @@ def index():
 	return render_template('index.html')
 
 @app.route('/search', methods = ['GET', 'POST'])
-def search():
+@app.route('/search/<query>', methods = ['GET', 'POST'])
+def search(query=None):
 	form = SearchForm()
 	if form.validate_on_submit():
-		query = '1' if form.by_title.data else '0'
-		query = query + '1' if form.by_author.data else query + '0'
-		return redirect(url_for('search_results', query = query + form.search.data))
-	return render_template('search.html', form = form)
-
-@app.route('/search_results/<query>')
-def search_results(query):
-	results = []
-	# form = SearchForm()
-	# if WHOOSH_ENABLED:
-	# 	if form.by_title:
-	# 		results += Book.query.whoosh_search(
-	# 			"*" + query + "*", limit = MAX_SEARCH_RESULTS, fields=('name',)).all()
-	# 	print results
-	# 	if form.by_author:
-	# 		authors = Author.query.whoosh_search(
-	# 			"*" + query + "*", limit = MAX_SEARCH_RESULTS).all()
-	# 		res = set([])
-	# 		for author in authors:
-	# 			res.update(author.books)
-	# 		results += list(res)
-	# 		results = list(set(results))
-	# else:
-	#print query
-	if query[0] == '1':
-		print 'a'		
-		results += Book.query.filter(Book.name.like('%' + query[2:] + '%')).all()
-	if query[1] == '1':
-		print 'b'
-		from models import authors
-		results += Book.query.join(authors).join(Author).filter(Author.name.like('%' + query[2:] + '%')).all()
-	results = list(set(results))
-	print query, results
-	return render_template('search_results.html', query = query[2:], results = results)
+		query = form.search.data
+		results = []
+		if form.by_title.data:
+			results += Book.query.filter(Book.name.like('%' + query + '%')).all()
+		if form.by_author.data:
+			from models import authors
+			results += Book.query.join(authors).join(Author).filter(
+				Author.name.like('%' + query + '%')).all()
+		results = set(results)
+		num = len(results)
+		return render_template('search.html', query = query, form = form,
+		                        results = results, num = num)
+	return render_template('search.html', form = form, query = query)
 
 
 @app.route('/signup', methods=['GET','POST'])
@@ -122,16 +98,41 @@ def logout():
 @app.route('/books', methods = ['GET', 'POST'])
 @app.route('/books/<int:page>', methods = ['GET', 'POST'])
 def books(page = 1):
+	form = AddBook()
+	if form.validate_on_submit():		
+		title = form.data['title']
+		book = Book.query.filter_by(name=title).first()
+		if book:
+			flash('Book already exists.')
+			return redirect(url_for('edit_book', id = book.id))
+		authors = list(set([Author.by_name(
+			name=a) for a in form.data['authors'] if a and Author.by_name(name=a)]))		
+		book = Book(title, authors)
+		db.session.add(book)
+		db.session.commit()
+		flash('Book has been added.')
+		return redirect(url_for('books'))
 	books = Book.query.order_by(Book.created.desc()).paginate(page, POSTS_PER_PAGE, False)
-	return render_template('books.html', books = books)
+	return render_template('books.html', books = books, form = form)
 
 
 @app.route('/authors', methods = ['GET', 'POST'])
 @app.route('/authors/<int:page>', methods = ['GET', 'POST'])
 def authors(page = 1):
+	form = EditAuthor()
+	if form.validate_on_submit():
+		name = form.name.data
+		registered_author = Author.by_name(name)
+		if registered_author:
+			flash('Author already exists.')
+			return redirect(url_for('authors'))
+		author = Author(name)
+		db.session.add(author)
+		db.session.commit()
+		flash("You've added a new author.")
+		return redirect(url_for('authors')) 
 	authors = Author.query.order_by(Author.created.desc()).paginate(page, POSTS_PER_PAGE, False)
-	print authors.items
-	return render_template('authors.html', authors = authors)
+	return render_template('authors.html', authors = authors, form = form)
 
 @app.errorhandler(404)
 def not_found_error(error):
@@ -148,17 +149,16 @@ def add_author():
 	form = EditAuthor()
 	if form.validate_on_submit():
 		name = form.name.data
-		registered_author = author_by_name(name)
+		registered_author = Author.by_name(name)
 		if registered_author:
 			flash('Author already exists.')
-			return redirect(url_for('add_author'))
+			return redirect(url_for('edit_author'))
 		author = Author(name)
 		db.session.add(author)
 		db.session.commit()
 		flash("You've added a new author.")
 		return redirect(url_for('authors'))
 	return render_template('add_author.html', form = form)
-
 
 
 
@@ -172,7 +172,7 @@ def edit_author(id):
 	form = EditAuthor()
 	if form.validate_on_submit():
 		name = form.name.data
-		if author_by_name(name) and author_by_name(name).id != author.id:
+		if Author.by_name(name) and Author.by_name(name).id != author.id:
 			flash("Can't change name to existing one.")
 			return redirect(url_for('edit_author', id = id))
 		author.name = name
@@ -204,8 +204,8 @@ def add_book():
 		if book:
 			flash('Book already exists.')
 			return redirect(url_for('edit_book', id = book.id))
-		authors = list(set([author_by_name(
-			name=a) for a in form.data['authors'] if a and author_by_name(name=a)]))		
+		authors = list(set([Author.by_name(
+			name=a) for a in form.data['authors'] if Author.is_valid(name=a)]))		
 		book = Book(title, authors)
 		db.session.add(book)
 		db.session.commit()
@@ -222,31 +222,49 @@ def edit_book(id):
 		flash("Book is not found")
 		return redirect(url_for('books'))
 	print book.authors
-	form = EditBook()
+	form = EditBook(book=book)	
+	print form.data, 'hah'
 	#form.authors.min_entries = len(book.authors)
-	form.title.data = book.name
-	print form.authors.data
-	form.authors[0].data = book.authors[0].name
-	for author in book.authors[1:]:
-		form.authors.append_entry(author.name)	
-	print form.authors.data
+	# print form.authors.data
+	# form.authors[0].data = book.authors[0].name
+	# for author in book.authors[1:]:
+	# 	form.authors.append_entry(author.name)	
+	# print form.authors.data
 
 	if form.validate_on_submit():		
-		print form.data['authors']
-		print request.data + 'lol'
+		print form.data
 		name = form.data['title']
-		if id != Book.query.filter_by(name=name).first().id:
+		newbook = Book.query.filter_by(name=name).first()		 
+		if newbook and id !=newbook.id:
 			flash("Can't change name to existing one.")
 			return redirect(url_for('edit_book', id = id))
 		book.name = name
-		authors = list(set([author_by_name(
-			name=a) for a in form.data['authors'] if a and author_by_name(name=a)]))
+		authors = list(set([Author.by_name(
+			name=a) for a in form.data['authors'] if Author.is_valid(name=a)]))
 		#print authors
 		book.authors = authors		
 		db.session.commit()
 		flash('Changes have been saved.')
 		return redirect(url_for('edit_book', id=id))
 	return render_template('edit_book.html', form = form)
+
+def get_author_list(max_results=0, starts_with=''):
+	authors = []
+	if len(starts_with) > 2:
+		authors = Author.query.filter(Author.name.startswith(starts_with)).all()
+	if max_results > 0:
+		authors = authors[:max_results]
+	return authors
+
+@app.route('/get_authors/<int:id>')
+def get_authors(id):
+	authors = []
+	starts_with = ''
+	if request.method == "GET":
+		starts_with = request.GET['authors-' + str(id)]
+	authors = get_author_list(10, starts_with)
+	return jsonify(results=authors)
+
 
 
 @app.route('/book/delete/<int:id>', methods = ['GET', 'POST'])
@@ -260,3 +278,10 @@ def delete_book(id):
 	db.session.commit()
 	flash("Book has been deleted")
 	return redirect(url_for('books'))
+
+@app.route('/users')
+@login_required
+def users():
+	users = User.query.all()
+	print users, users
+	return render_template('users.html', users = users)
