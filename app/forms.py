@@ -46,7 +46,7 @@ class EditBook(Form):
 		super(EditBook, self).__init__(*args, **kwargs)
 		self.book = kwargs.pop("book", None)
 		self.title.data = self.book.name
-		#self.authors[0].data = self.book.authors[0].name
+		self.authors[0].data = self.book.authors[0].name
 		# for a in self.book.authors[1:]:
 		# 	self.authors.append_entry(a.name)
 		#self.process(obj=self.book)

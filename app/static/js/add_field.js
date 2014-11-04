@@ -36,6 +36,7 @@ return false;
 $("body").on("click",".removeclass", function(e){ //user click on remove text
         if( $('input:text').length > 2 ) {
                 $(this).parent('div').remove(); //remove text box
+                //$(this).parent('div').children('input').attr("value", "lal") 
                 x--; //decrement textbox
         }
 return false;
