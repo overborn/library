@@ -5,9 +5,14 @@
 <h1 class="text-center"> Authors </h1>
 {% if g.user.is_authenticated() %}
 
-<p class="text-center"><button  class="btn btn-primary"><b>Add a new author</b></button></p>
+<p class="text-center"><button class="btn btn-primary"><b>Add a new author</b></button></p>
+
+<div class="well">
+Type name here: <input id="adder" name="adder"><button class="btn" id="badder"> add </button>
+</div>
 
 <script src="/static/js/toggle_form.js"></script>
+<script src="/static/js/add_author.js"></script>
 
 <div class="well">
 <h3>Add author</h3>
@@ -30,10 +35,11 @@
 
 {% endif %}
 
-
+<div class="authors">
 {% for author in authors.items %}
 {% include 'author.html' %}
 {% endfor %}
+</div>
 <ul class="pager">
     {% if authors.has_prev %}
     <li class="previous"><a href="{{ url_for('authors', page = authors.prev_num) }}">Newer</a></li>

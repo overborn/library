@@ -12,8 +12,7 @@ $(AddButton).click(function (e)  //on add input button click
         if(x <= MaxInputs) //max input box allowed
         {
             FieldCount++; //text box added increment
-            //add input box
-            //$('form').append('<div><input type="text" class="span4" id="authors-' + FieldCount +'" name="authors[]" placeholder="author ' + FieldCount +'"><a href="#" class="removeclass">&times;</a></div>');
+            //add input box            
             var a = $("#authorsDiv").clone();
             a.children('input').attr({
             id: 'authors-' + FieldCount,
@@ -22,11 +21,6 @@ $(AddButton).click(function (e)  //on add input button click
             value : ''                 
             });
             a.appendTo('form');
-            // $('<input>').attr({
-            //     type: 'text',
-            //     id: 'authors-' + FieldCount ,
-            //     name: 'authors-' + FieldCount, 
-            //     value: "value"}).appendTo('form');
             x++; //text box increment
         }
 
@@ -36,7 +30,6 @@ return false;
 $("body").on("click",".removeclass", function(e){ //user click on remove text
         if( $('input:text').length > 2 ) {
                 $(this).parent('div').remove(); //remove text box
-                //$(this).parent('div').children('input').attr("value", "lal") 
                 x--; //decrement textbox
         }
 return false;

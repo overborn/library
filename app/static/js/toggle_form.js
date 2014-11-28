@@ -1,6 +1,7 @@
 $(document).ready(function(){
-	$("div.well").hide()
-  $("button").click(function(){
-    $("div.well").toggle(500);
-  });
+    $("div.well:eq(1)").hide()
+    $("button").not('#badder').click(function(){
+        $("div.well:eq(1)").toggle(500);
+    });
+    
 });
