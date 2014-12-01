@@ -107,8 +107,8 @@ def books(page=1):
         if book:
             flash('Book already exists.')
             return redirect(url_for('edit_book', id=book.id))
-        authors = set([Author.by_name(name=a) 
-            for a in form.data['authors'] if a and Author.by_name(name=a)])        
+        authors = list(set([Author.by_name(name=a)
+            for a in form.data['authors'] if a and Author.by_name(name=a)]))        
         book = Book(title, authors)
         db.session.add(book)
         db.session.commit()
@@ -220,8 +220,8 @@ def add_book():
         if book:
             flash('Book already exists.')
             return redirect(url_for('edit_book', id=book.id))
-        authors = set([Author.by_name(name=a)
-            for a in form.data['authors'] if Author.exists(name=a)])      
+        authors = list(set([Author.by_name(name=a)
+            for a in form.data['authors'] if Author.exists(name=a)]))      
         book = Book(title, authors)
         db.session.add(book)
         db.session.commit()
